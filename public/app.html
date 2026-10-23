@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Toko Produk</title>
+        <style>
+            :root {
+                --bg: #f5f7f4;
+                --card: #ffffff;
+                --ink: #1d2b2a;
+                --muted: #6b7a78;
+                --line: #dbe3df;
+                --main: #1f6f64;
+                --main-dark: #17554d;
+                --danger: #b3382c;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                font-family: "Segoe UI", system-ui, sans-serif;
+                background: var(--bg);
+                color: var(--ink);
+                line-height: 1.5;
+            }
+            header {
+                background: var(--main);
+                color: #fff;
+                padding: 14px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            header h1 {
+                font-size: 20px;
+                margin: 0;
+            }
+            main {
+                max-width: 1000px;
+                margin: 24px auto;
+                padding: 0 16px;
+            }
+            .box {
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            h2 {
+                margin: 0 0 14px;
+                font-size: 18px;
+            }
+            label {
+                display: block;
+                font-size: 14px;
+                margin: 10px 0 4px;
+                color: var(--muted);
+            }
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 9px 10px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                font: inherit;
+                background: #fff;
+            }
+            input:focus,
+            select:focus,
+            textarea:focus,
+            button:focus-visible {
+                outline: 2px solid var(--main);
+                outline-offset: 1px;
+            }
+            button {
+                padding: 9px 16px;
+                border: 0;
+                border-radius: 6px;
+                background: var(--main);
+                color: #fff;
+                font: inherit;
+                cursor: pointer;
+            }
+            button:hover {
+                background: var(--main-dark);
+            }
+            button.ghost {
+                background: transparent;
+                color: var(--main);
+                border: 1px solid var(--main);
+            }
+            button.ghost:hover {
+                background: #e6f0ee;
+            }
+            button.danger {
+                background: var(--danger);
+            }
+            header button {
+                background: #fff;
+                color: var(--main);
+            }
+            .auth {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .row {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                align-items: end;
+            }
+            .row > div {
+                flex: 1;
+                min-width: 130px;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+                gap: 16px;
+            }
+            .item {
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                overflow: hidden;
+                background: #fff;
+                display: flex;
+                flex-direction: column;
+            }
+            .item img,
+            .noimg {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                background: #e9eeec;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--muted);
+                font-size: 13px;
+            }
+            .item .body {
+                padding: 12px;
+                flex: 1;
+            }
+            .item h3 {
+                margin: 0 0 4px;
+                font-size: 16px;
+            }
+            .price {
+                color: var(--main);
+                font-weight: 600;
+            }
+            .cat {
+                font-size: 13px;
+                color: var(--muted);
+            }
+            .item .actions {
+                display: flex;
+                gap: 8px;
+                padding: 0 12px 12px;
+            }
+            .item .actions button {
+                flex: 1;
+                padding: 7px;
+                font-size: 14px;
+            }
+            .pager {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 12px;
+                margin-top: 18px;
+            }
+            #msg {
+                position: fixed;
+                bottom: 16px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 10px 18px;
+                border-radius: 6px;
+                color: #fff;
+                display: none;
+                max-width: 90%;
+                z-index: 10;
+            }
+            #msg.ok {
+                background: var(--main);
+            }
+            #msg.err {
+                background: var(--danger);
+            }
+            .hidden {
+                display: none !important;
+            }
+            .empty {
+                text-align: center;
+                color: var(--muted);
+                padding: 30px 0;
+            }
+            @media (max-width: 640px) {
+                .auth {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Toko Produk</h1>
+            <div id="userInfo" class="hidden">
+                <span id="userName"></span>
+                <button onclick="logout()">Keluar</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- ===== BAGIAN LOGIN / REGISTER (tampil kalau belum login) ===== -->
+            <section id="authSection" class="auth">
+                <div class="box">
+                    <h2>Masuk</h2>
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" />
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" />
+                    <p><button onclick="login()">Masuk</button></p>
+                </div>
+                <div class="box">
+                    <h2>Daftar akun baru</h2>
+                    <label>Nama</label>
+                    <input type="text" id="regName" />
+                    <label>Email</label>
+                    <input type="email" id="regEmail" />
+                    <label>Password (minimal 6 karakter)</label>
+                    <input type="password" id="regPassword" />
+                    <label>Ulangi password</label>
+                    <input type="password" id="regPassword2" />
+                    <p><button onclick="register()">Daftar</button></p>
+                </div>
+            </section>
+
+            <!-- ===== BAGIAN PRODUK (tampil kalau sudah login) ===== -->
+            <section id="appSection" class="hidden">
+                <div class="box">
+                    <h2 id="formTitle">Tambah produk</h2>
+                    <input type="hidden" id="productId" />
+                    <div class="row">
+                        <div>
+                            <label>Nama produk</label
+                            ><input type="text" id="pName" />
+                        </div>
+                        <div>
+                            <label>Kategori</label
+                            ><input
+                                type="text"
+                                id="pCategory"
+                                placeholder="contoh: fashion"
+                            />
+                        </div>
+                        <div>
+                            <label>Harga (Rp)</label
+                            ><input type="number" id="pPrice" min="0" />
+                        </div>
+                    </div>
+                    <label>Deskripsi (opsional)</label>
+                    <textarea id="pDesc" rows="2"></textarea>
+                    <label>Gambar (jpg/png, maks 2 MB)</label>
+                    <input
+                        type="file"
+                        id="pImage"
+                        accept="image/png,image/jpeg"
+                    />
+                    <p>
+                        <button onclick="saveProduct()" id="saveBtn">
+                            Simpan produk
+                        </button>
+                        <button
+                            class="ghost hidden"
+                            id="cancelBtn"
+                            onclick="resetForm()"
+                        >
+                            Batal edit
+                        </button>
+                    </p>
+                </div>
+
+                <div class="box">
+                    <h2>Daftar produk</h2>
+                    <div class="row">
+                        <div>
+                            <label>Cari nama</label
+                            ><input
+                                type="text"
+                                id="fSearch"
+                                placeholder="kaos"
+                            />
+                        </div>
+                        <div>
+                            <label>Kategori</label
+                            ><input type="text" id="fCategory" />
+                        </div>
+                        <div>
+                            <label>Harga min</label
+                            ><input type="number" id="fMin" />
+                        </div>
+                        <div>
+                            <label>Harga maks</label
+                            ><input type="number" id="fMax" />
+                        </div>
+                        <div>
+                            <button onclick="loadProducts(1)">Cari</button>
+                        </div>
+                        <div>
+                            <button class="ghost" onclick="resetFilter()">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <br />
+                    <div id="productList" class="grid"></div>
+                    <div class="pager">
+                        <button
+                            class="ghost"
+                            id="prevBtn"
+                            onclick="changePage(-1)"
+                        >
+                            Sebelumnya
+                        </button>
+                        <span id="pageInfo"></span>
+                        <button
+                            class="ghost"
+                            id="nextBtn"
+                            onclick="changePage(1)"
+                        >
+                            Berikutnya
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div id="msg"></div>
+
+        <script>
+            // Karena file ini ada di folder public Laravel, alamat API cukup "/api"
+            const API = "/api";
+
+            let currentPage = 1;
+            let lastPage = 1;
+
+            // ---------- Fungsi bantu ----------
+
+            function getToken() {
+                return localStorage.getItem("token");
+            }
+            function getUser() {
+                return JSON.parse(localStorage.getItem("user") || "null");
+            }
+
+            function showMsg(text, type) {
+                const el = document.getElementById("msg");
+                el.textContent = text;
+                el.className = type;
+                el.style.display = "block";
+                setTimeout(() => {
+                    el.style.display = "none";
+                }, 3500);
+            }
+
+            // Fungsi umum untuk memanggil API
+            async function api(path, method = "GET", body = null) {
+                const headers = { Accept: "application/json" };
+                if (getToken())
+                    headers["Authorization"] = "Bearer " + getToken();
+
+                const options = { method, headers };
+                if (body instanceof FormData) {
+                    options.body = body; // upload file: jangan set Content-Type
+                } else if (body) {
+                    headers["Content-Type"] = "application/json";
+                    options.body = JSON.stringify(body);
+                }
+
+                const res = await fetch(API + path, options);
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    // Token tidak valid / kedaluwarsa: kembali ke halaman login
+                    if (res.status === 401 && getToken()) {
+                        clearSession();
+                    }
+                    // Gabungkan pesan error validasi (422) kalau ada
+                    let message = data.message || "Terjadi kesalahan";
+                    if (data.errors)
+                        message = Object.values(data.errors).flat().join(" ");
+                    throw new Error(message);
+                }
+                return data;
+            }
+
+            function clearSession() {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                updateView();
+            }
+
+            function esc(text) {
+                const d = document.createElement("div");
+                d.textContent = text ?? "";
+                return d.innerHTML;
+            }
+
+            function rupiah(n) {
+                return "Rp " + Number(n).toLocaleString("id-ID");
+            }
+
+            // ---------- Tampilan login / aplikasi ----------
+
+            function updateView() {
+                const loggedIn = !!getToken();
+                document
+                    .getElementById("authSection")
+                    .classList.toggle("hidden", loggedIn);
+                document
+                    .getElementById("appSection")
+                    .classList.toggle("hidden", !loggedIn);
+                document
+                    .getElementById("userInfo")
+                    .classList.toggle("hidden", !loggedIn);
+                if (loggedIn) {
+                    document.getElementById("userName").textContent =
+                        getUser()?.name || "";
+                    loadProducts(1);
+                }
+            }
+
+            // ---------- Auth ----------
+
+            async function register() {
+                try {
+                    const data = await api("/register", "POST", {
+                        name: document.getElementById("regName").value,
+                        email: document.getElementById("regEmail").value,
+                        password: document.getElementById("regPassword").value,
+                        password_confirmation:
+                            document.getElementById("regPassword2").value,
+                    });
+                    saveSession(data);
+                    showMsg("Akun berhasil dibuat", "ok");
+                } catch (e) {
+                    showMsg(e.message, "err");
+                }
+            }
+
+            async function login() {
+                try {
+                    const data = await api("/login", "POST", {
+                        email: document.getElementById("loginEmail").value,
+                        password:
+                            document.getElementById("loginPassword").value,
+                    });
+                    saveSession(data);
+                    showMsg("Berhasil masuk", "ok");
+                } catch (e) {
+                    showMsg(e.message, "err");
+                }
+            }
+
+            function saveSession(data) {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                updateView();
+            }
+
+            async function logout() {
+                try {
+                    await api("/logout", "POST");
+                } catch (e) {}
+                clearSession();
+                showMsg("Berhasil keluar", "ok");
+            }
+
+            // ---------- Produk: tampil, cari, filter, halaman ----------
+
+            async function loadProducts(page = 1) {
+                const params = new URLSearchParams({ page });
+                const filters = {
+                    search: "fSearch",
+                    category: "fCategory",
+                    min_price: "fMin",
+                    max_price: "fMax",
+                };
+                for (const key in filters) {
+                    const val = document
+                        .getElementById(filters[key])
+                        .value.trim();
+                    if (val) params.append(key, val);
+                }
+
+                try {
+                    const res = await api("/products?" + params.toString());
+                    currentPage = res.current_page;
+                    lastPage = res.last_page;
+                    renderProducts(res.data);
+                } catch (e) {
+                    showMsg(e.message, "err");
+                }
+            }
+
+            function renderProducts(products) {
+                const list = document.getElementById("productList");
+                const me = getUser();
+
+                if (products.length === 0) {
+                    list.innerHTML =
+                        '<div class="empty" style="grid-column:1/-1">Belum ada produk yang cocok. Coba ubah pencarian atau tambah produk baru.</div>';
+                } else {
+                    list.innerHTML = products
+                        .map((p) => {
+                            const isOwner = me && p.user_id === me.id; // tombol hanya untuk pemilik
+                            const img = p.image_url
+                                ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}">`
+                                : `<div class="noimg">Tanpa gambar</div>`;
+                            const actions = isOwner
+                                ? `<div class="actions">
+               <button class="ghost" onclick="editProduct(${p.id})">Ubah</button>
+               <button class="danger" onclick="deleteProduct(${p.id})">Hapus</button>
+             </div>`
+                                : "";
+                            return `<div class="item">
+                  ${img}
+                  <div class="body">
+                    <h3>${esc(p.name)}</h3>
+                    <div class="price">${rupiah(p.price)}</div>
+                    <div class="cat">${esc(p.category)}</div>
+                    <div>${esc(p.description)}</div>
+                  </div>
+                  ${actions}
+                </div>`;
+                        })
+                        .join("");
+                }
+
+                document.getElementById("pageInfo").textContent =
+                    `Halaman ${currentPage} dari ${lastPage}`;
+                document.getElementById("prevBtn").disabled = currentPage <= 1;
+                document.getElementById("nextBtn").disabled =
+                    currentPage >= lastPage;
+            }
+
+            function changePage(step) {
+                const target = currentPage + step;
+                if (target >= 1 && target <= lastPage) loadProducts(target);
+            }
+
+            function resetFilter() {
+                ["fSearch", "fCategory", "fMin", "fMax"].forEach(
+                    (id) => (document.getElementById(id).value = ""),
+                );
+                loadProducts(1);
+            }
+
+            // ---------- Produk: tambah, ubah, hapus ----------
+
+            async function saveProduct() {
+                const id = document.getElementById("productId").value;
+                const form = new FormData();
+                form.append("name", document.getElementById("pName").value);
+                form.append(
+                    "category",
+                    document.getElementById("pCategory").value,
+                );
+                form.append("price", document.getElementById("pPrice").value);
+                form.append(
+                    "description",
+                    document.getElementById("pDesc").value,
+                );
+
+                const file = document.getElementById("pImage").files[0];
+                if (file) form.append("image", file);
+
+                try {
+                    if (id) {
+                        form.append("_method", "PUT"); // update dikirim via POST + _method=PUT
+                        await api("/products/" + id, "POST", form);
+                        showMsg("Produk berhasil diubah", "ok");
+                    } else {
+                        await api("/products", "POST", form);
+                        showMsg("Produk berhasil ditambahkan", "ok");
+                    }
+                    resetForm();
+                    loadProducts(currentPage);
+                } catch (e) {
+                    showMsg(e.message, "err");
+                }
+            }
+
+            async function editProduct(id) {
+                try {
+                    const p = await api("/products/" + id);
+                    document.getElementById("productId").value = p.id;
+                    document.getElementById("pName").value = p.name;
+                    document.getElementById("pCategory").value = p.category;
+                    document.getElementById("pPrice").value = p.price;
+                    document.getElementById("pDesc").value =
+                        p.description || "";
+                    document.getElementById("pImage").value = "";
+                    document.getElementById("formTitle").textContent =
+                        "Ubah produk (kosongkan gambar jika tidak diganti)";
+                    document.getElementById("saveBtn").textContent =
+                        "Simpan perubahan";
+                    document
+                        .getElementById("cancelBtn")
+                        .classList.remove("hidden");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                } catch (e) {
+                    showMsg(e.message, "err");
+                }
+            }
+
+            async function deleteProduct(id) {
+                if (!confirm("Hapus produk ini?")) return;
+                try {
+                    await api("/products/" + id, "DELETE");
+                    showMsg("Produk berhasil dihapus", "ok");
+                    loadProducts(currentPage);
+                } catch (e) {
+                    showMsg(e.message, "err");
+                }
+            }
+
+            function resetForm() {
+                [
+                    "productId",
+                    "pName",
+                    "pCategory",
+                    "pPrice",
+                    "pDesc",
+                    "pImage",
+                ].forEach((id) => (document.getElementById(id).value = ""));
+                document.getElementById("formTitle").textContent =
+                    "Tambah produk";
+                document.getElementById("saveBtn").textContent =
+                    "Simpan produk";
+                document.getElementById("cancelBtn").classList.add("hidden");
+            }
+
+            // Jalankan saat halaman dibuka
+            updateView();
+        </script>
+    </body>
+</html>
